@@ -3,12 +3,14 @@ const app = express();
 const cors = require("cors");
 const port = 3042;
 
+const { recoverKey } = require('./recoverKey')
+
 app.use(cors());
 app.use(express.json());
 
 const balances = {
-  "03ac87c03b054c60ffd97797219dcbe510247f0d8143171924dd47cc4ffd01fde0": 100,
-  "039b33f9018df20d9a63ce4a955ff09c414d344ec2c7edaa5d409e650b39023c5f": 50,
+  "028ea3d57eb9b626080612a812e602f4567259ec142a0772c822cdbcd5271b0032": 100,
+  "024f307ae09806ebc1694502ce651bd95a4a52767a8a4ab21d6bea350f7bf2c6b4": 50,
   "0363d0041ca9bf243cb010b6efd1e173baaf0e08ddf28319cc04bf14c19e90d7b6": 75,
 };
 
@@ -19,15 +21,19 @@ app.get("/balance/:address", (req, res) => {
 });
 
 app.post("/send", (req, res) => {
-  const { sender, recipient, amount } = req.body;
 
+  //get the signature from the client side
+  //recover the public key from the signatue
+
+  const { signature, recipient, amount } = req.body;
+
+  let sender = recoverKey(signature, amount);
   setInitialBalance(sender);
   setInitialBalance(recipient);
 
   if (balances[sender] < amount) {
     res.status(400).send({ message: "Not enough funds!" });
   } else {
-    console.log(balances);
     balances[sender] -= amount;
     balances[recipient] += amount;
     res.send({ balance: balances[sender] });
