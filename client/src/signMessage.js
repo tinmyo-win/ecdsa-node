@@ -6,7 +6,7 @@ async function signMessage(amount, privKey) {
 
     const amountHash = utf8ToBytes(amount);
     const msgHash = toHex(keccak256(amountHash));
-    const signature = (await secp.signAsync(msgHash, privKey)).toCompactHex(); // sign
+    const signature = (await secp.signAsync(msgHash, privKey)).addRecoveryBit(0).toCompactHex(); // sign
 
     return signature;
 }
